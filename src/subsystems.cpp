@@ -31,7 +31,7 @@ void driveRPM(int y, int r, bool scalingEnabled)
     backRight.move_velocity(-y + r);
 }
 
-void driveVoltage(int y, int r, bool scalingEnabled = true)
+void driveVoltage(int y, int r, bool scalingEnabled)
 {
     //If the input values are greater than 127, scale them proportionally so
     //that they are within the motor voltage bounds of [-12000, 12000]
