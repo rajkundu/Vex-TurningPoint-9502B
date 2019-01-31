@@ -20,8 +20,8 @@ void driveRPM(int y, int r, bool scalingEnabled)
     {
         if(abs(y) + abs(r) > 200)
         {
-            y = 200 * y / ((float)(abs(y) + abs(r)));
-            r = 200 * r / ((float)(abs(y) + abs(r)));
+            y = round(200 * y / ((float)(abs(y) + abs(r))));
+            r = round(200 * r / ((float)(abs(y) + abs(r))));
         }
     }
 
@@ -40,8 +40,8 @@ void driveVoltage(int y, int r, bool scalingEnabled)
         if(abs(y) + abs(r) > 127)
         {
             //12000 because in mV, not RPM
-            y = 12000 * y / ((float)(abs(y) + abs(r)));
-            r = 12000 * r / ((float)(abs(y) + abs(r)));
+            y = round(12000 * y / ((float)(abs(y) + abs(r))));
+            r = round(12000 * r / ((float)(abs(y) + abs(r))));
         }
     }
 
