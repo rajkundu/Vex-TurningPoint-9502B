@@ -16,8 +16,17 @@
  */
 void opcontrol()
 {
+	//Instantiate controller object
+	Controller masterController(E_CONTROLLER_MASTER);
+
 	while (true)
 	{
+		//Drive arcade control with y and r inputs
+		driveVoltage(
+			masterController.get_analog(E_CONTROLLER_ANALOG_LEFT_Y),
+			masterController.get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
+		);
+		
 		pros::delay(20);
 	}
 }
