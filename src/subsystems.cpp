@@ -47,8 +47,8 @@ void driveVoltage(int y, int r, bool scalingEnabled)
 
     frontLeft.move_voltage(y + r);
     frontRight.move_voltage(-y + r);
-    backLeft.move_velocity(y + r);
-    backRight.move_velocity(-y + r);
+    backLeft.move_voltage(y + r);
+    backRight.move_voltage(-y + r);
 }
 
 //----------------------------------------------------------------------------//
