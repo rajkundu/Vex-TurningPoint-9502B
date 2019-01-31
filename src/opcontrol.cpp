@@ -19,7 +19,7 @@ void opcontrol()
 	//Instantiate controller object
 	Controller masterController(E_CONTROLLER_MASTER);
 
-	while (true)
+	while(true)
 	{
 		//Drive arcade control with y and r inputs
 		driveVoltage(
