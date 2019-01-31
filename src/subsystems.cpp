@@ -52,3 +52,44 @@ void driveVoltage(int y, int r, bool scalingEnabled)
 }
 
 //----------------------------------------------------------------------------//
+
+//---------------------------------- Puncher ---------------------------------//
+
+//---------- Motors ----------//
+
+Motor puncher(5, E_MOTOR_GEARSET_36, true, E_MOTOR_ENCODER_DEGREES);
+Motor angleAdjuster(6, E_MOTOR_GEARSET_36, true, E_MOTOR_ENCODER_DEGREES);
+
+//-------- Global Vars -------//
+
+int numLaunches = 0;
+
+//--------- Functions --------//
+
+void resetPuncher()
+{
+    puncher.move_velocity(0);
+
+    //Wait until puncher motor is stopped
+    while(!puncher.is_stopped())
+    {
+        delay(20);
+    }
+
+    //Reset position variables
+    puncher.tare_position();
+    numLaunches = 0;
+}
+
+void launch()
+{
+    numLaunches++;
+    puncher.move_absolute(numLaunches * 360, 100);
+}
+
+void setPuncherAngle(PuncherAngles angle)
+{
+    angleAdjuster.move_absolute(static_cast<double>(angle), 100);
+}
+
+//----------------------------------------------------------------------------//

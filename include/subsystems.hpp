@@ -37,3 +37,38 @@ void driveRPM(int y, int r, bool scalingEnabled = true);
 void driveVoltage(int y, int r, bool scalingEnabled = true);
 
 //----------------------------------------------------------------------------//
+
+//---------------------------------- Puncher ---------------------------------//
+
+//---------- Motors ----------//
+
+extern Motor puncher;
+extern Motor angleAdjuster;
+
+//-------- Global Vars -------//
+
+extern int numLaunches;
+enum class PuncherAngles
+{
+    HIGH_FLAG = 0,
+    LOW_FLAG = 35
+};
+
+//--------- Functions --------//
+
+/**
+ * resets puncher home position
+ */
+void resetPuncher();
+
+/**
+ * launches ball by rotating puncher motor 360 degrees
+ */
+void launch();
+
+/**
+ * sets angle of puncher angle adjuster arm
+ */
+void setPuncherAngle(PuncherAngles angle);
+
+//----------------------------------------------------------------------------//
