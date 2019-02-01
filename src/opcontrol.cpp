@@ -51,10 +51,12 @@ void opcontrol()
 			setIntake(200);
 			cockPuncher(false);
 			setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG, true);
+
+			//Give second ball some time to load
 			delay(250);
 
-			//Initiate launch but allow 250 ms for ball to settle in puncher
-			//while launch is in progress
+			//Initiate launch but allow extra 250 ms for ball to settle in
+			//puncher while puncher is cocking further
 			launch(false);
 			delay(250);
 
