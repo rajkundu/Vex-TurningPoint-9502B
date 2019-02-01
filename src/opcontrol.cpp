@@ -26,7 +26,39 @@ void opcontrol()
 			masterController.get_analog(E_CONTROLLER_ANALOG_LEFT_Y),
 			masterController.get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
 		);
+
+		//Puncher launch = Button A
+		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_A))
+		{
+			launch();
+		}
+
+		lcd::clear_line(1);
+		lcd::print(1, "PAngle: %f", angleAdjuster.get_position());
 		
+		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
+		{
+			setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
+			launch();
+			delay(750);
+
+			setIntake(200);
+			delay(500);
+			launch();
+			setIntake(0);
+			setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG);
+		}
+
+		if(masterController.get_digital(E_CONTROLLER_DIGITAL_LEFT))
+		{
+			setIntake(200);
+		}
+		else
+		{
+			setIntake(0);
+		}
+		
+
 		pros::delay(20);
 	}
 }
