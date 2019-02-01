@@ -52,9 +52,9 @@ extern int numLaunches;
 enum class PuncherAngles
 {
     NEAR_HIGH_FLAG = 45,
-    NEAR_LOW_FLAG = 75,
+    NEAR_MID_FLAG = 75,
     FAR_HIGH_FLAG = 57,
-    FAR_LOW_FLAG = 75
+    FAR_MID_FLAG = 75
 };
 
 //--------- Functions --------//

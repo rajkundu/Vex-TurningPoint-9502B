@@ -40,7 +40,7 @@ void opcontrol()
 		//Double shot macro
 		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
 		{
-			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_LOW_FLAG);
+			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_MID_FLAG);
 		}
 
 		if(masterController.get_digital(E_CONTROLLER_DIGITAL_L1))
