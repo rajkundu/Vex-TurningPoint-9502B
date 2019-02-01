@@ -30,34 +30,54 @@ void opcontrol()
 		//Puncher launch = Button A
 		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_A))
 		{
-			launch();
+			//Launch and wait for completion
+			launch(true);
 		}
 
 		lcd::clear_line(1);
 		lcd::print(1, "PAngle: %f", angleAdjuster.get_position());
 		
+		//Double shot macro
 		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
 		{
-			setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
-			launch();
-			delay(750);
+			//Set puncher to high flag
+			setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG, true);
 
+			//Launch and wait for completion
+			launch(true);
+
+			//Once first launch is complete, load second ball, cock puncher,
+			//and wait for angle to be set to low flag
 			setIntake(200);
-			delay(500);
-			launch();
+			cockPuncher(false);
+			setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG, true);
+			delay(250);
+
+			//Initiate launch but allow 250 ms for ball to settle in puncher
+			//while launch is in progress
+			launch(false);
+			delay(250);
+
+			//Stop intake and wait for launch to complete
 			setIntake(0);
-			setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG);
+			waitForPuncher();
+			numLaunches++;
 		}
 
-		if(masterController.get_digital(E_CONTROLLER_DIGITAL_LEFT))
+		if(masterController.get_digital(E_CONTROLLER_DIGITAL_L1))
 		{
+			//Intake balls
 			setIntake(200);
+		}
+		else if(masterController.get_digital(E_CONTROLLER_DIGITAL_L2))
+		{
+			//Flip caps/out-take balls
+			setIntake(-150);
 		}
 		else
 		{
 			setIntake(0);
 		}
-		
 
 		pros::delay(20);
 	}
