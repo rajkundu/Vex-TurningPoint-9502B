@@ -9,6 +9,7 @@
  */
 void initialize()
 {
+    lcd::initialize();
 }
 
 /**
