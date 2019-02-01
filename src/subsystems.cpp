@@ -14,8 +14,8 @@ Motor backRight(4, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
 
 void driveRPM(int y, int r, bool scalingEnabled)
 {
-    //If the values are greater than 200, scale them proportionally so that they
-    //are within the motor velocity bounds of [-200, 200]
+    //If the input values' total exceeds 200, scale them while maintaining their
+    //proportion to each other
     if(scalingEnabled)
     {
         if(abs(y) + abs(r) > 200)
@@ -31,10 +31,14 @@ void driveRPM(int y, int r, bool scalingEnabled)
     backRight.move_velocity(-y + r);
 }
 
-void driveVoltage(int y, int r, bool scalingEnabled)
+void driveVoltage(float y, float r, bool scalingEnabled)
 {
-    //If the input values are greater than 12000, scale them proportionally so
-    //that they are within the motor voltage bounds of [-12000, 12000]
+    //Scale up from 127 to 12000
+    y *= 12000.0 / 127.0;
+    r *= 12000.0 / 127.0;
+
+    //If the input values' total exceeds 12000, scale them while maintaining
+    //their proportion to each other
     if(scalingEnabled)
     {
         if(abs(y) + abs(r) > 12000)
@@ -79,22 +83,60 @@ void resetPuncher()
     //Reset position variables
     puncher.tare_position();
     numLaunches = 0;
+    return;
 }
 
-void launch()
+void launch(bool blocking)
 {
-    numLaunches++;
-    puncher.move_absolute(numLaunches * 360, 100);
+    //Set puncher motor target to next launch's end position
+    puncher.move_absolute(numLaunches * 360 + 360, 100);
+
+    if(blocking)
+    {
+        waitForPuncher();
+        numLaunches++;
+    }
+    return;
 }
 
-void setPuncherAngle(PuncherAngles angle, int speed)
+void cockPuncher(bool blocking)
+{
+    //Set puncher motor target to current launch end position + 90 deg
+    puncher.move_absolute(numLaunches * 360 + 90, 100);
+    return;
+}
+
+void waitForPuncher(int endPos)
+{
+    //Wait for angle adjuster to be done
+    auto settledUtil = okapi::SettledUtilFactory::create();
+    while(!settledUtil.isSettled(endPos - puncher.get_position()))
+    {
+        delay(20);
+    }
+    return;
+}
+
+void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
 {
     angleAdjuster.move_absolute(static_cast<double>(angle), speed);
+    
+    if(blocking)
+    {
+        //Wait for angle adjuster to be done
+        auto settledUtil = okapi::SettledUtilFactory::create();
+        while(!settledUtil.isSettled(angleAdjuster.get_target_position() - angleAdjuster.get_position()))
+        {
+            delay(20);
+        }
+    }
+    return;
 }
 
 void setIntake(int speed)
 {
     intake.move_velocity(speed);
+    return;
 }
 
 //----------------------------------------------------------------------------//

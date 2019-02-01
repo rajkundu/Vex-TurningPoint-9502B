@@ -28,13 +28,13 @@ void driveRPM(int y, int r, bool scalingEnabled = true);
 /**
  * sets drivetrain speed using voltage control
  * @param y desired forward-backward component
- *  - range [-12000, 12000]
+ *  - range [-127, 127]
  * @param r desired rotational component
- *  - range [-12000, 12000]
+ *  - range [-127, 127]
  * @param scalingEnabled whether or not to apply proportional scaling to y and r
  *  - default true
  */
-void driveVoltage(int y, int r, bool scalingEnabled = true);
+void driveVoltage(float y, float r, bool scalingEnabled = true);
 
 //----------------------------------------------------------------------------//
 
@@ -66,13 +66,33 @@ void resetPuncher();
 
 /**
  * launches ball by rotating puncher motor 360 degrees
+ * @param blocking whether or not to wait for launch to complete
  */
-void launch();
+void launch(bool blocking = false);
+
+/**
+ * cocks puncher (moves slide track back so that ball can be loaded)
+ * @param blocking whether or not to wait for cocking to complete
+ */
+void cockPuncher(bool blocking = false);
+
+/**
+ * waits for puncher to reach certain position
+ * @param endPos the position until which to wait
+ *  - default next multiple of 360 deg (next launch end position)
+ */
+void waitForPuncher(int endPos = numLaunches * 360 + 360);
 
 /**
  * sets angle of puncher angle adjuster arm
+ * @param angle the angle at which to set the puncher
+ * @param speed the speed at which to run the angle adjuster motor
+ *  - units RPM
+ *  - default 50 RPM
+ * @param blocking whether or not to wait for angle adjuster to reach angle
+ *  - default false
  */
-void setPuncherAngle(PuncherAngles angle, int speed = 50);
+void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false);
 
 /**
  * sets speed of ball intake
