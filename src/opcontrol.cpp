@@ -31,7 +31,7 @@ void opcontrol()
 		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_A))
 		{
 			//Launch and wait for completion
-			launch(true);
+			launch(false);
 		}
 
 		lcd::clear_line(1);

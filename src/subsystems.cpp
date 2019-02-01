@@ -99,10 +99,10 @@ void launch(bool blocking)
     return;
 }
 
-void cockPuncher(bool blocking)
+void primePuncher(int primePos, bool blocking)
 {
     //Set puncher motor target to current launch end position + 90 deg
-    puncher.move_absolute(numLaunches * 360 + 90, 100);
+    puncher.move_absolute(numLaunches * 360 + primePos, 100);
     return;
 }
 
@@ -141,18 +141,19 @@ void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngl
     //Launch and wait for completion
     launch(true);
 
-    //Once first launch is complete, load second ball, cock puncher,
+    //Once first launch is complete, load second ball, prime puncher,
     //and wait for angle to be set to low flag
     setIntake(200);
-    cockPuncher(false);
+    primePuncher(false);
     setPuncherAngle(secondPuncherAngle, true);
 
     //Give second ball some time to load
     delay(250);
 
     //Initiate launch but allow extra 250 ms for ball to settle in
-    //puncher while puncher is cocking further
-    launch(false);
+    //puncher while puncher is priming further before launch
+    //Launch and wait for completion
+	launch(false);
     delay(250);
 
     //Stop intake and wait for launch to complete

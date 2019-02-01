@@ -71,14 +71,18 @@ void resetPuncher();
 void launch(bool blocking = false);
 
 /**
- * cocks puncher (moves slide track back so that ball can be loaded)
- * @param blocking whether or not to wait for cocking to complete
+ * primes puncher (moves slide track back so that ball can be loaded)
+ * @param priming position relative to home position
+ *  - units degrees
+ *  - default 90 degrees
+ * @param blocking whether or not to wait for priming to complete
  */
-void cockPuncher(bool blocking = false);
+void primePuncher(int primePos = 90, bool blocking = false);
 
 /**
  * waits for puncher to reach certain position
  * @param endPos the position until which to wait
+ *  - units degrees
  *  - default next multiple of 360 deg (next launch end position)
  */
 void waitForPuncher(int endPos = numLaunches * 360 + 360);
@@ -98,8 +102,10 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
  * runs double shot macro
  * @param firstPuncherAngle the first angle at which to set the puncher angle
  *  adjuster arm
+ *  - units degrees
  * @param secondPuncherAngle the second angle at which to set the puncher angle
  *  adjuster arm
+ *  - units degrees
  */
 void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle);
 
