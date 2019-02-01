@@ -33,13 +33,12 @@ void driveRPM(int y, int r, bool scalingEnabled)
 
 void driveVoltage(int y, int r, bool scalingEnabled)
 {
-    //If the input values are greater than 127, scale them proportionally so
+    //If the input values are greater than 12000, scale them proportionally so
     //that they are within the motor voltage bounds of [-12000, 12000]
     if(scalingEnabled)
     {
-        if(abs(y) + abs(r) > 127)
+        if(abs(y) + abs(r) > 12000)
         {
-            //12000 because in mV, not RPM
             y = round(12000 * y / static_cast<float>(abs(y) + abs(r)));
             r = round(12000 * r / static_cast<float>(abs(y) + abs(r)));
         }
@@ -58,7 +57,8 @@ void driveVoltage(int y, int r, bool scalingEnabled)
 //---------- Motors ----------//
 
 Motor puncher(5, E_MOTOR_GEARSET_36, true, E_MOTOR_ENCODER_DEGREES);
-Motor angleAdjuster(6, E_MOTOR_GEARSET_36, true, E_MOTOR_ENCODER_DEGREES);
+Motor angleAdjuster(6, E_MOTOR_GEARSET_36, false, E_MOTOR_ENCODER_DEGREES);
+Motor intake(7, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
 
 //-------- Global Vars -------//
 
@@ -87,9 +87,14 @@ void launch()
     puncher.move_absolute(numLaunches * 360, 100);
 }
 
-void setPuncherAngle(PuncherAngles angle)
+void setPuncherAngle(PuncherAngles angle, int speed)
 {
-    angleAdjuster.move_absolute(static_cast<double>(angle), 100);
+    angleAdjuster.move_absolute(static_cast<double>(angle), speed);
+}
+
+void setIntake(int speed)
+{
+    intake.move_velocity(speed);
 }
 
 //----------------------------------------------------------------------------//
