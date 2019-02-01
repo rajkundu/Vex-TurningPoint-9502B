@@ -95,6 +95,15 @@ void waitForPuncher(int endPos = numLaunches * 360 + 360);
 void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false);
 
 /**
+ * runs double shot macro
+ * @param firstPuncherAngle the first angle at which to set the puncher angle
+ *  adjuster arm
+ * @param secondPuncherAngle the second angle at which to set the puncher angle
+ *  adjuster arm
+ */
+void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle);
+
+/**
  * sets speed of ball intake
  */
 void setIntake(int speed);

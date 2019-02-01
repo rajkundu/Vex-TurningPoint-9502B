@@ -133,6 +133,34 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
     return;
 }
 
+void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle)
+{
+    //Set puncher to high flag
+    setPuncherAngle(firstPuncherAngle, true);
+
+    //Launch and wait for completion
+    launch(true);
+
+    //Once first launch is complete, load second ball, cock puncher,
+    //and wait for angle to be set to low flag
+    setIntake(200);
+    cockPuncher(false);
+    setPuncherAngle(secondPuncherAngle, true);
+
+    //Give second ball some time to load
+    delay(250);
+
+    //Initiate launch but allow extra 250 ms for ball to settle in
+    //puncher while puncher is cocking further
+    launch(false);
+    delay(250);
+
+    //Stop intake and wait for launch to complete
+    setIntake(0);
+    waitForPuncher();
+    numLaunches++;
+}
+
 void setIntake(int speed)
 {
     intake.move_velocity(speed);

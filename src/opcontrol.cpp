@@ -40,30 +40,7 @@ void opcontrol()
 		//Double shot macro
 		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
 		{
-			//Set puncher to high flag
-			setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG, true);
-
-			//Launch and wait for completion
-			launch(true);
-
-			//Once first launch is complete, load second ball, cock puncher,
-			//and wait for angle to be set to low flag
-			setIntake(200);
-			cockPuncher(false);
-			setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG, true);
-
-			//Give second ball some time to load
-			delay(250);
-
-			//Initiate launch but allow extra 250 ms for ball to settle in
-			//puncher while puncher is cocking further
-			launch(false);
-			delay(250);
-
-			//Stop intake and wait for launch to complete
-			setIntake(0);
-			waitForPuncher();
-			numLaunches++;
+			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_LOW_FLAG);
 		}
 
 		if(masterController.get_digital(E_CONTROLLER_DIGITAL_L1))
