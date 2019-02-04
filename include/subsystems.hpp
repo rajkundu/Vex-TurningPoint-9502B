@@ -51,8 +51,8 @@ extern Motor intake;
 extern int numLaunches;
 enum class PuncherAngles
 {
-    NEAR_HIGH_FLAG = 45,
-    NEAR_MID_FLAG = 75,
+    NEAR_HIGH_FLAG = 50,
+    NEAR_MID_FLAG = 77,
     FAR_HIGH_FLAG = 57,
     FAR_MID_FLAG = 75
 };
@@ -86,6 +86,11 @@ void primePuncher(int primePos = 90, bool blocking = false);
  *  - default next multiple of 360 deg (next launch end position)
  */
 void waitForPuncher(int endPos = numLaunches * 360 + 360);
+
+/**
+ * waits for puncher to complete launch
+ */
+void waitForLaunch();
 
 /**
  * sets angle of puncher angle adjuster arm

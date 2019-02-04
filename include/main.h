@@ -51,6 +51,7 @@
  * namespace.
  */
 using namespace pros;
+using namespace okapi::literals;
 // using namespace pros::literals;
 // using namespace okapi;
 

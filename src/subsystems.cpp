@@ -103,18 +103,30 @@ void primePuncher(int primePos, bool blocking)
 {
     //Set puncher motor target to current launch end position + 90 deg
     puncher.move_absolute(numLaunches * 360 + primePos, 100);
+
+    if(blocking)
+    {
+        waitForPuncher(primePos);
+    }
     return;
 }
 
 void waitForPuncher(int endPos)
 {
-    //Wait for angle adjuster to be done
+    //Wait for puncher rotation to be done
     auto settledUtil = okapi::SettledUtilFactory::create();
-    while(!settledUtil.isSettled(endPos - puncher.get_position()))
+    //Wait until puncher reaches (endPos) degrees past home position
+    while(!settledUtil.isSettled(numLaunches * 360 + endPos - puncher.get_position()))
     {
         delay(20);
     }
     return;
+}
+
+void waitForLaunch()
+{
+    waitForPuncher(360);
+    numLaunches++;
 }
 
 void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
@@ -124,8 +136,8 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
     if(blocking)
     {
         //Wait for angle adjuster to be done
-        auto settledUtil = okapi::SettledUtilFactory::create();
-        while(!settledUtil.isSettled(angleAdjuster.get_target_position() - angleAdjuster.get_position()))
+        auto settledUtil = okapi::SettledUtilFactory::create(3, 5, 60_ms);
+        while(!settledUtil.isSettled(static_cast<float>(angle) - angleAdjuster.get_position()))
         {
             delay(20);
         }
@@ -136,30 +148,21 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
 void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle)
 {
     //Set puncher to high flag
-    setPuncherAngle(firstPuncherAngle, true);
+    setPuncherAngle(firstPuncherAngle, 50, true);
 
     //Launch and wait for completion
-    launch(true);
+    launch();
+    waitForLaunch();
 
-    //Once first launch is complete, load second ball, prime puncher,
+    //Once first launch is complete, load second ball, initiate launch,
     //and wait for angle to be set to low flag
     setIntake(200);
-    primePuncher(false);
-    setPuncherAngle(secondPuncherAngle, true);
+    launch();
+    setPuncherAngle(secondPuncherAngle, 50, true);
 
-    //Give second ball some time to load
-    delay(250);
-
-    //Initiate launch but allow extra 250 ms for ball to settle in
-    //puncher while puncher is priming further before launch
-    //Launch and wait for completion
-	launch(false);
-    delay(250);
-
-    //Stop intake and wait for launch to complete
+    //Wait for launch to complete and stop intake
+    waitForLaunch();
     setIntake(0);
-    waitForPuncher();
-    numLaunches++;
 }
 
 void setIntake(int speed)
