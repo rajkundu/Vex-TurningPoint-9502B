@@ -3,12 +3,9 @@
 
 //-------------------------------- Drivetrain --------------------------------//
 
-//---------- Motors ----------//
+//-------- Global Vars -------//
 
-extern Motor frontLeft;
-extern Motor frontRight;
-extern Motor backLeft;
-extern Motor backRight;
+extern ChassisControllerPID drivetrain;
 
 //--------- Functions --------//
 
@@ -23,7 +20,7 @@ extern Motor backRight;
  * @param scalingEnabled whether or not to apply proportional scaling to y and r
  *  - default true
  */
-void driveRPM(int y, int r, bool scalingEnabled = true);
+void driveRPM(double y, double r, bool scalingEnabled = true);
 
 /**
  * sets drivetrain speed using voltage control
@@ -34,7 +31,7 @@ void driveRPM(int y, int r, bool scalingEnabled = true);
  * @param scalingEnabled whether or not to apply proportional scaling to y and r
  *  - default true
  */
-void driveVoltage(float y, float r, bool scalingEnabled = true);
+void driveVoltage(double y, double r, bool scalingEnabled = true);
 
 //----------------------------------------------------------------------------//
 

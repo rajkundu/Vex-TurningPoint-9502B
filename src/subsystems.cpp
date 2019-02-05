@@ -3,55 +3,65 @@
 
 //-------------------------------- Drivetrain --------------------------------//
 
-//---------- Motors ----------//
+//-------- Global Vars -------//
 
-Motor frontLeft(1, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
-Motor frontRight(2, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
-Motor backLeft(3, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
-Motor backRight(4, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
+ChassisControllerPID drivetrain = ChassisControllerFactory::create(
+    //Left motors
+    {1, 2},
+    //Right motors
+    {-3, -4},
+    //Distance PID constants
+    IterativePosPIDController::Gains{0.5, 0, 0},
+    //Angle PID constants (keeps robot straight)
+    IterativePosPIDController::Gains{0.1, 0.05, 0},
+    //Turn PID constants
+    IterativePosPIDController::Gains{0.2, 0, 0},
+    //Gearset
+    AbstractMotor::gearset::green,
+    //Wheel diameter, wheelbase width
+    {4.1_in, 12.5_in}
+);
 
 //--------- Functions --------//
 
-void driveRPM(int y, int r, bool scalingEnabled)
+void driveRPM(double y, double r, bool scalingEnabled)
 {
-    //If the input values' total exceeds 200, scale them while maintaining their
+    //Scale down from 200 to 1
+    y /= 200.0;
+    r /= 200.0;
+
+    //If the input values' total exceeds 1, scale them to maintain their
     //proportion to each other
     if(scalingEnabled)
     {
-        if(abs(y) + abs(r) > 200)
+        if(abs(y) + abs(r) > 1)
         {
-            y = round(200 * y / static_cast<float>(abs(y) + abs(r)));
-            r = round(200 * r / static_cast<float>(abs(y) + abs(r)));
+            y = y / static_cast<float>(abs(y) + abs(r));
+            r = r / static_cast<float>(abs(y) + abs(r));
         }
     }
 
-    frontLeft.move_velocity(y + r);
-    frontRight.move_velocity(-y + r);
-    backLeft.move_velocity(y + r);
-    backRight.move_velocity(-y + r);
+    drivetrain.driveVector(y, r);
 }
 
-void driveVoltage(float y, float r, bool scalingEnabled)
+void driveVoltage(double y, double r, bool scalingEnabled)
 {
-    //Scale up from 127 to 12000
-    y *= 12000.0 / 127.0;
-    r *= 12000.0 / 127.0;
+    //Scale down from 127 to 1
+    y /= 127.0;
+    r /= 127.0;
 
-    //If the input values' total exceeds 12000, scale them while maintaining
-    //their proportion to each other
+    //If the input values' total exceeds 1, scale them to maintain their
+    //proportion to each other
     if(scalingEnabled)
     {
-        if(abs(y) + abs(r) > 12000)
+        if(abs(y) + abs(r) > 1)
         {
-            y = round(12000 * y / static_cast<float>(abs(y) + abs(r)));
-            r = round(12000 * r / static_cast<float>(abs(y) + abs(r)));
+            y = y / static_cast<float>(abs(y) + abs(r));
+            r = r / static_cast<float>(abs(y) + abs(r));
         }
     }
 
-    frontLeft.move_voltage(y + r);
-    frontRight.move_voltage(-y + r);
-    backLeft.move_voltage(y + r);
-    backRight.move_voltage(-y + r);
+    drivetrain.arcade(y, r);
 }
 
 //----------------------------------------------------------------------------//
@@ -60,9 +70,9 @@ void driveVoltage(float y, float r, bool scalingEnabled)
 
 //---------- Motors ----------//
 
-Motor puncher(5, E_MOTOR_GEARSET_36, true, E_MOTOR_ENCODER_DEGREES);
-Motor angleAdjuster(6, E_MOTOR_GEARSET_36, false, E_MOTOR_ENCODER_DEGREES);
-Motor intake(7, E_MOTOR_GEARSET_18, false, E_MOTOR_ENCODER_DEGREES);
+Motor puncher(5, true, AbstractMotor::gearset::red);
+Motor angleAdjuster(6, false, AbstractMotor::gearset::red);
+Motor intake(7, false, AbstractMotor::gearset::green);
 
 //-------- Global Vars -------//
 
@@ -72,16 +82,16 @@ int numLaunches = 0;
 
 void resetPuncher()
 {
-    puncher.move_velocity(0);
+    puncher.moveVelocity(0);
 
     //Wait until puncher motor is stopped
-    while(!puncher.is_stopped())
+    while(!puncher.isStopped())
     {
-        delay(20);
+        pros::delay(10);
     }
 
     //Reset position variables
-    puncher.tare_position();
+    puncher.tarePosition();
     numLaunches = 0;
     return;
 }
@@ -89,7 +99,7 @@ void resetPuncher()
 void launch(bool blocking)
 {
     //Set puncher motor target to next launch's end position
-    puncher.move_absolute(numLaunches * 360 + 360, 100);
+    puncher.moveAbsolute(numLaunches * 360 + 360, 100);
 
     if(blocking)
     {
@@ -102,7 +112,7 @@ void launch(bool blocking)
 void primePuncher(int primePos, bool blocking)
 {
     //Set puncher motor target to current launch end position + 90 deg
-    puncher.move_absolute(numLaunches * 360 + primePos, 100);
+    puncher.moveAbsolute(numLaunches * 360 + primePos, 100);
 
     if(blocking)
     {
@@ -114,11 +124,11 @@ void primePuncher(int primePos, bool blocking)
 void waitForPuncher(int endPos)
 {
     //Wait for puncher rotation to be done
-    auto settledUtil = okapi::SettledUtilFactory::create();
+    auto settledUtil = SettledUtilFactory::create();
     //Wait until puncher reaches (endPos) degrees past home position
-    while(!settledUtil.isSettled(numLaunches * 360 + endPos - puncher.get_position()))
+    while(!settledUtil.isSettled(numLaunches * 360 + endPos - puncher.getPosition()))
     {
-        delay(20);
+        pros::delay(10);
     }
     return;
 }
@@ -131,15 +141,15 @@ void waitForLaunch()
 
 void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
 {
-    angleAdjuster.move_absolute(static_cast<double>(angle), speed);
+    angleAdjuster.moveAbsolute(static_cast<double>(angle), speed);
     
     if(blocking)
     {
         //Wait for angle adjuster to be done
-        auto settledUtil = okapi::SettledUtilFactory::create(3, 5, 60_ms);
-        while(!settledUtil.isSettled(static_cast<float>(angle) - angleAdjuster.get_position()))
+        auto settledUtil = SettledUtilFactory::create(3, 5, 60_ms);
+        while(!settledUtil.isSettled(static_cast<float>(angle) - angleAdjuster.getPosition()))
         {
-            delay(20);
+            pros::delay(10);
         }
     }
     return;
@@ -167,7 +177,7 @@ void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngl
 
 void setIntake(int speed)
 {
-    intake.move_velocity(speed);
+    intake.moveVelocity(speed);
     return;
 }
 

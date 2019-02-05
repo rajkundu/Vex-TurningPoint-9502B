@@ -9,7 +9,7 @@
  */
 void initialize()
 {
-    lcd::initialize();
+    pros::lcd::initialize();
 }
 
 /**

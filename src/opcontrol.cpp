@@ -17,38 +17,38 @@
 void opcontrol()
 {
 	//Instantiate controller object
-	Controller masterController(E_CONTROLLER_MASTER);
+	Controller masterController(ControllerId::master);
 
 	while(true)
 	{
 		//Drive arcade control with y and r inputs
 		driveVoltage(
-			masterController.get_analog(E_CONTROLLER_ANALOG_LEFT_Y),
-			masterController.get_analog(E_CONTROLLER_ANALOG_RIGHT_X)
+			(127 * masterController.getAnalog(ControllerAnalog::leftY)),
+			(127 * masterController.getAnalog(ControllerAnalog::rightX))
 		);
 
 		//Puncher launch = Button A
-		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_A))
+		if(masterController.getDigital(ControllerDigital::A))
 		{
 			//Launch and wait for completion
 			launch(false);
 		}
 
-		lcd::clear_line(1);
-		lcd::print(1, "PAngle: %f", angleAdjuster.get_position());
+		pros::lcd::clear_line(1);
+		pros::lcd::print(1, "PAngle: %f", angleAdjuster.get_position());
 		
 		//Double shot macro
-		if(masterController.get_digital_new_press(E_CONTROLLER_DIGITAL_B))
+		if(masterController.getDigital(ControllerDigital::B))
 		{
 			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_MID_FLAG);
 		}
 
-		if(masterController.get_digital(E_CONTROLLER_DIGITAL_L1))
+		if(masterController.getDigital(ControllerDigital::L1))
 		{
 			//Intake balls
 			setIntake(200);
 		}
-		else if(masterController.get_digital(E_CONTROLLER_DIGITAL_L2))
+		else if(masterController.getDigital(ControllerDigital::L2))
 		{
 			//Flip caps/out-take balls
 			setIntake(-150);
