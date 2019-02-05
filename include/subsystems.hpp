@@ -15,6 +15,16 @@
  */
 double scaleDeadband(double input, double threshold);
 
+/**
+ * Scales input according to exponential curve
+ * @param input base
+ * @param power power to which input will be raised
+ * @param maxValue the maximum value to be reached
+ * 
+ * @return f(x) according to curve defined by parameters
+ */
+double expCurve(double input, double power, double maxValue);
+
 //----------------------------------------------------------------------------//
 //                                 Drivetrain                                 //
 //----------------------------------------------------------------------------//

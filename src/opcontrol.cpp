@@ -27,8 +27,8 @@ void opcontrol()
 
 		//Drive arcade control with y and r inputs
 		driveVoltage(
-			scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::leftY), 8),
-			scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::rightX), 8)
+			expCurve(scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::leftY), 8), 1.5, 127),
+			expCurve(scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::rightX), 8), 2, 127)
 		);
 
 		//--------------------------------------------------------------------//

@@ -9,14 +9,19 @@
 
 double scaleDeadband(double input, double threshold)
 {
-    if(input > threshold)
+    if(std::abs(input) > threshold)
     {
-        return (input - threshold) * (127.0 / (127.0 - threshold));
+        return std::copysign((std::abs(input) - std::abs(threshold)) * (127.0 / (127.0 - std::abs(threshold))), input);
     }
     else
     {
         return 0;
     }
+}
+
+double expCurve(double input, double power, double maxValue)
+{
+    return maxValue * std::copysign(std::pow(std::abs(input) / std::abs(maxValue), power), input);
 }
 
 //----------------------------------------------------------------------------//
@@ -52,7 +57,7 @@ void driveRPM(double y, double r, bool preserveProportion)
 
     //If the input values' total exceeds 1, scale them to maintain their
     //proportion to each other
-    if(prerserveProportion)
+    if(preserveProportion)
     {
         if(abs(y) + abs(r) > 1)
         {
