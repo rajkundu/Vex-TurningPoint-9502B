@@ -1,9 +1,25 @@
-//Guard
+//Header guard
 #pragma once
 
-//-------------------------------- Drivetrain --------------------------------//
+//----------------------------------------------------------------------------//
+//                                Miscellaneous                               //
+//----------------------------------------------------------------------------//
 
-//-------- Global Vars -------//
+//--------- Functions --------//
+
+/**
+ * Scales input according to deadband and maximum
+ * @param input value to be scaled
+ * @param threshold threshold at/below which to return 0
+ * @return scaled value or 0
+ */
+double scaleDeadband(double input, double threshold);
+
+//----------------------------------------------------------------------------//
+//                                 Drivetrain                                 //
+//----------------------------------------------------------------------------//
+
+//---------- Globals ---------//
 
 extern ChassisControllerPID drivetrain;
 
@@ -34,16 +50,15 @@ void driveRPM(double y, double r, bool scalingEnabled = true);
 void driveVoltage(double y, double r, bool scalingEnabled = true);
 
 //----------------------------------------------------------------------------//
-
-//---------------------------------- Puncher ---------------------------------//
+//                                  Puncher                                   //
+//----------------------------------------------------------------------------//
 
 //---------- Motors ----------//
 
 extern Motor puncher;
 extern Motor angleAdjuster;
-extern Motor intake;
 
-//-------- Global Vars -------//
+//---------- Globals ---------//
 
 extern int numLaunches;
 enum class PuncherAngles
@@ -111,9 +126,17 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
  */
 void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle);
 
+//----------------------------------------------------------------------------//
+//                                   Intake                                   //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+extern Motor intake;
+
+//--------- Functions --------//
+
 /**
  * sets speed of ball intake
  */
 void setIntake(int speed);
-
-//----------------------------------------------------------------------------//

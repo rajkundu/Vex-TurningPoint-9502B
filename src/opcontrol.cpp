@@ -21,11 +21,19 @@ void opcontrol()
 
 	while(true)
 	{
+		//--------------------------------------------------------------------//
+		//                             Drivetrain                             //
+		//--------------------------------------------------------------------//
+
 		//Drive arcade control with y and r inputs
 		driveVoltage(
-			(127 * masterController.getAnalog(ControllerAnalog::leftY)),
-			(127 * masterController.getAnalog(ControllerAnalog::rightX))
+			scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::leftY), 8),
+			scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::rightX), 8)
 		);
+
+		//--------------------------------------------------------------------//
+		//                               Puncher                              //
+		//--------------------------------------------------------------------//
 
 		//Puncher launch = Button A
 		if(masterController.getDigital(ControllerDigital::A))
@@ -34,6 +42,7 @@ void opcontrol()
 			launch(false);
 		}
 
+		//Print angle adjuster to LLEMU
 		pros::lcd::clear_line(1);
 		pros::lcd::print(1, "PAngle: %f", angleAdjuster.get_position());
 		
@@ -42,6 +51,10 @@ void opcontrol()
 		{
 			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_MID_FLAG);
 		}
+
+		//--------------------------------------------------------------------//
+		//                               Intake                               //
+		//--------------------------------------------------------------------//
 
 		if(masterController.getDigital(ControllerDigital::L1))
 		{

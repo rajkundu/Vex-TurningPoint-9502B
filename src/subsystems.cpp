@@ -1,9 +1,29 @@
 #include "main.h"
 #include "subsystems.hpp"
 
-//-------------------------------- Drivetrain --------------------------------//
+//----------------------------------------------------------------------------//
+//                                Miscellaneous                               //
+//----------------------------------------------------------------------------//
 
-//-------- Global Vars -------//
+//--------- Functions --------//
+
+double scaleDeadband(double input, double threshold)
+{
+    if(input > threshold)
+    {
+        return (input - threshold) * (127.0 / (127.0 - threshold));
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+//----------------------------------------------------------------------------//
+//                                 Drivetrain                                 //
+//----------------------------------------------------------------------------//
+
+//---------- Globals ---------//
 
 ChassisControllerPID drivetrain = ChassisControllerFactory::create(
     //Left motors
@@ -65,16 +85,15 @@ void driveVoltage(double y, double r, bool scalingEnabled)
 }
 
 //----------------------------------------------------------------------------//
-
-//---------------------------------- Puncher ---------------------------------//
+//                                   Puncher                                  //
+//----------------------------------------------------------------------------//
 
 //---------- Motors ----------//
 
 Motor puncher(5, true, AbstractMotor::gearset::red);
 Motor angleAdjuster(6, false, AbstractMotor::gearset::red);
-Motor intake(7, false, AbstractMotor::gearset::green);
 
-//-------- Global Vars -------//
+//---------- Globals ---------//
 
 int numLaunches = 0;
 
@@ -175,10 +194,21 @@ void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngl
     setIntake(0);
 }
 
+//----------------------------------------------------------------------------//
+//                                  Intake                                   //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+Motor intake(7, false, AbstractMotor::gearset::green);
+
+//--------- Functions --------//
+
+/**
+ * sets speed of ball intake
+ */
 void setIntake(int speed)
 {
     intake.moveVelocity(speed);
     return;
 }
-
-//----------------------------------------------------------------------------//
