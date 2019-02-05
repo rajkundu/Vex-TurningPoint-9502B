@@ -33,10 +33,11 @@ extern ChassisControllerPID drivetrain;
  * @param r desired rotational component
  *  - range [-200, 200]
  *  - units RPM
- * @param scalingEnabled whether or not to apply proportional scaling to y and r
+ * @param preserveProportion whether or not to preserve proportion between y and
+ *  r
  *  - default true
  */
-void driveRPM(double y, double r, bool scalingEnabled = true);
+void driveRPM(double y, double r, bool preserveProportion = true);
 
 /**
  * sets drivetrain speed using voltage control
@@ -44,10 +45,11 @@ void driveRPM(double y, double r, bool scalingEnabled = true);
  *  - range [-127, 127]
  * @param r desired rotational component
  *  - range [-127, 127]
- * @param scalingEnabled whether or not to apply proportional scaling to y and r
+ * @param preserveProportion whether or not to preserve proportion between y and
+ *  r
  *  - default true
  */
-void driveVoltage(double y, double r, bool scalingEnabled = true);
+void driveVoltage(double y, double r, bool preserveProportion = true);
 
 //----------------------------------------------------------------------------//
 //                                  Puncher                                   //

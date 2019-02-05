@@ -44,7 +44,7 @@ ChassisControllerPID drivetrain = ChassisControllerFactory::create(
 
 //--------- Functions --------//
 
-void driveRPM(double y, double r, bool scalingEnabled)
+void driveRPM(double y, double r, bool preserveProportion)
 {
     //Scale down from 200 to 1
     y /= 200.0;
@@ -52,7 +52,7 @@ void driveRPM(double y, double r, bool scalingEnabled)
 
     //If the input values' total exceeds 1, scale them to maintain their
     //proportion to each other
-    if(scalingEnabled)
+    if(prerserveProportion)
     {
         if(abs(y) + abs(r) > 1)
         {
@@ -64,7 +64,7 @@ void driveRPM(double y, double r, bool scalingEnabled)
     drivetrain.driveVector(y, r);
 }
 
-void driveVoltage(double y, double r, bool scalingEnabled)
+void driveVoltage(double y, double r, bool preserveProportion)
 {
     //Scale down from 127 to 1
     y /= 127.0;
@@ -72,7 +72,7 @@ void driveVoltage(double y, double r, bool scalingEnabled)
 
     //If the input values' total exceeds 1, scale them to maintain their
     //proportion to each other
-    if(scalingEnabled)
+    if(preserveProportion)
     {
         if(abs(y) + abs(r) > 1)
         {
