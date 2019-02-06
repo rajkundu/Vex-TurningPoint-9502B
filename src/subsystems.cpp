@@ -101,6 +101,7 @@ Motor angleAdjuster(6, false, AbstractMotor::gearset::red);
 //---------- Globals ---------//
 
 int numLaunches = 0;
+const int puncherPositionValues[] = {50, 77, 57, 75};
 
 //--------- Functions --------//
 
@@ -163,15 +164,15 @@ void waitForLaunch()
     numLaunches++;
 }
 
-void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
+void setPuncherAngle(PuncherPositions posName, int speed, bool blocking)
 {
-    angleAdjuster.moveAbsolute(static_cast<double>(angle), speed);
+    angleAdjuster.moveAbsolute(puncherPositionValues[static_cast<int>(posName)], speed);
     
     if(blocking)
     {
         //Wait for angle adjuster to be done
         auto settledUtil = SettledUtilFactory::create(3, 5, 60_ms);
-        while(!settledUtil.isSettled(static_cast<float>(angle) - angleAdjuster.getPosition()))
+        while(!settledUtil.isSettled(puncherPositionValues[static_cast<int>(posName)] - angleAdjuster.getPosition()))
         {
             pros::delay(10);
         }
@@ -179,10 +180,10 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
     return;
 }
 
-void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle)
+void doubleShot(PuncherPositions firstPosName, PuncherPositions secondPosName)
 {
     //Set puncher to high flag
-    setPuncherAngle(firstPuncherAngle, 50, true);
+    setPuncherAngle(firstPosName, 50, true);
 
     //Launch and wait for completion
     launch();
@@ -192,7 +193,7 @@ void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngl
     //and wait for angle to be set to low flag
     setIntake(200);
     launch();
-    setPuncherAngle(secondPuncherAngle, 50, true);
+    setPuncherAngle(secondPosName, 50, true);
 
     //Wait for launch to complete and stop intake
     waitForLaunch();
