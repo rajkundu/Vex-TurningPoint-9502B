@@ -136,7 +136,8 @@ void updatePuncherReady()
 {
     puncherReady = puncherSettledUtil.isSettled(puncher.getTargetPosition() - puncher.getPosition());
 
-    //Update numLaunches if target position is not 0 (to ensure that this isn't just the puncher initializing)
+    //Update numLaunches if target position is not 0 (to ensure that this isn't
+    //just the puncher motor starting at and immediately reaching 0)
     if(puncherReady && !puncherReady_last && (puncher.getTargetPosition() != 0))
     {
         numLaunches++;
