@@ -80,6 +80,9 @@ enum class PuncherAngles
     FAR_HIGH_FLAG = 57,
     FAR_MID_FLAG = 75
 };
+extern SettledUtil puncherSettledUtil;
+extern bool puncherReady;
+extern bool puncherReady_last;
 
 //--------- Functions --------//
 
@@ -87,6 +90,12 @@ enum class PuncherAngles
  * resets puncher home position
  */
 void resetPuncher();
+
+/**
+ * checks whether puncher has reached target position
+ * @return status of puncher SettledUtil
+ */
+void updatePuncherReady();
 
 /**
  * launches ball by rotating puncher motor 360 degrees
@@ -104,17 +113,9 @@ void launch(bool blocking = false);
 void primePuncher(int primePos = 90, bool blocking = false);
 
 /**
- * waits for puncher to reach certain position
- * @param endPos the position until which to wait
- *  - units degrees
- *  - default next multiple of 360 deg (next launch end position)
+ * waits for puncher to reach its last-set target position
  */
-void waitForPuncher(int endPos = numLaunches * 360 + 360);
-
-/**
- * waits for puncher to complete launch
- */
-void waitForLaunch();
+void waitForPuncherReady();
 
 /**
  * sets angle of puncher angle adjuster arm
@@ -129,14 +130,14 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
 
 /**
  * runs double shot macro
- * @param firstPuncherAngle the first angle at which to set the puncher angle
+ * @param firstAngle the first angle at which to set the puncher angle
  *  adjuster arm
  *  - units degrees
- * @param secondPuncherAngle the second angle at which to set the puncher angle
+ * @param secondAngle the second angle at which to set the puncher angle
  *  adjuster arm
  *  - units degrees
  */
-void doubleShot(PuncherAngles firstPuncherAngle, PuncherAngles secondPuncherAngle);
+void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle);
 
 //----------------------------------------------------------------------------//
 //                                   Intake                                   //

@@ -32,9 +32,9 @@ double expCurve(double input, double power, double maxValue)
 
 ChassisControllerPID drivetrain = ChassisControllerFactory::create(
     //Left motors
-    {1, 2},
+    {10, 3},
     //Right motors
-    {-3, -4},
+    {-13, -12},
     //Distance PID constants
     IterativePosPIDController::Gains{0.5, 0, 0},
     //Angle PID constants (keeps robot straight)
@@ -95,19 +95,22 @@ void driveVoltage(double y, double r, bool preserveProportion)
 
 //---------- Motors ----------//
 
-Motor puncher(5, true, AbstractMotor::gearset::red);
-Motor angleAdjuster(6, false, AbstractMotor::gearset::red);
+Motor puncher(9, true, AbstractMotor::gearset::red);
+Motor angleAdjuster(11, false, AbstractMotor::gearset::red);
 
 //---------- Globals ---------//
 
 int numLaunches = 0;
 const int puncherPositionValues[] = {50, 77, 57, 75};
+SettledUtil puncherSettledUtil = SettledUtilFactory::create();
+bool puncherReady = true;
+bool puncherReady_last = true;
 
 //--------- Functions --------//
 
 void resetPuncher()
 {
-    puncher.moveVelocity(0);
+    /*puncher.moveVelocity(0);
 
     //Wait until puncher motor is stopped
     while(!puncher.isStopped())
@@ -118,7 +121,28 @@ void resetPuncher()
     //Reset position variables
     puncher.tarePosition();
     numLaunches = 0;
+    */
+
+    //Wait for puncher motor to initialize
+    while(!puncherReady)
+    {
+        updatePuncherReady();
+        pros::delay(10);
+    }
     return;
+}
+
+void updatePuncherReady()
+{
+    puncherReady = puncherSettledUtil.isSettled(puncher.getTargetPosition() - puncher.getPosition());
+
+    //Update numLaunches if target position is not 0 (to ensure that this isn't just the puncher initializing)
+    if(puncherReady && !puncherReady_last && (puncher.getTargetPosition() != 0))
+    {
+        numLaunches++;
+    }
+
+    puncherReady_last = puncherReady;
 }
 
 void launch(bool blocking)
@@ -128,8 +152,7 @@ void launch(bool blocking)
 
     if(blocking)
     {
-        waitForPuncher();
-        numLaunches++;
+        waitForPuncherReady();
     }
     return;
 }
@@ -141,38 +164,32 @@ void primePuncher(int primePos, bool blocking)
 
     if(blocking)
     {
-        waitForPuncher(primePos);
+        waitForPuncherReady();
     }
     return;
 }
 
-void waitForPuncher(int endPos)
+void waitForPuncherReady()
 {
-    //Wait for puncher rotation to be done
-    auto settledUtil = SettledUtilFactory::create();
-    //Wait until puncher reaches (endPos) degrees past home position
-    while(!settledUtil.isSettled(numLaunches * 360 + endPos - puncher.getPosition()))
+    //Wait until puncher reaches target
+    while(!puncherReady)
     {
+        updatePuncherReady();
         pros::delay(10);
     }
+
     return;
 }
 
-void waitForLaunch()
+void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
 {
-    waitForPuncher(360);
-    numLaunches++;
-}
-
-void setPuncherAngle(PuncherPositions posName, int speed, bool blocking)
-{
-    angleAdjuster.moveAbsolute(puncherPositionValues[static_cast<int>(posName)], speed);
+    angleAdjuster.moveAbsolute(puncherPositionValues[static_cast<int>(angle)], speed);
     
     if(blocking)
     {
         //Wait for angle adjuster to be done
-        auto settledUtil = SettledUtilFactory::create(3, 5, 60_ms);
-        while(!settledUtil.isSettled(puncherPositionValues[static_cast<int>(posName)] - angleAdjuster.getPosition()))
+        auto angleSettledUtil = SettledUtilFactory::create(3, 5, 60_ms);
+        while(!angleSettledUtil.isSettled(puncherPositionValues[static_cast<int>(angle)] - angleAdjuster.getPosition()))
         {
             pros::delay(10);
         }
@@ -180,23 +197,23 @@ void setPuncherAngle(PuncherPositions posName, int speed, bool blocking)
     return;
 }
 
-void doubleShot(PuncherPositions firstPosName, PuncherPositions secondPosName)
+void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
 {
     //Set puncher to high flag
-    setPuncherAngle(firstPosName, 50, true);
+    setPuncherAngle(firstAngle, 50, true);
 
     //Launch and wait for completion
     launch();
-    waitForLaunch();
+    waitForPuncherReady();
 
     //Once first launch is complete, load second ball, initiate launch,
     //and wait for angle to be set to low flag
     setIntake(200);
     launch();
-    setPuncherAngle(secondPosName, 50, true);
+    setPuncherAngle(secondAngle, 50, true);
 
     //Wait for launch to complete and stop intake
-    waitForLaunch();
+    waitForPuncherReady();
     setIntake(0);
 }
 
@@ -206,7 +223,7 @@ void doubleShot(PuncherPositions firstPosName, PuncherPositions secondPosName)
 
 //---------- Motors ----------//
 
-Motor intake(7, false, AbstractMotor::gearset::green);
+Motor intake(18, false, AbstractMotor::gearset::green);
 
 //--------- Functions --------//
 

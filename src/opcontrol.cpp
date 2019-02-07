@@ -19,6 +19,10 @@ void opcontrol()
 	//Instantiate controller object
 	Controller masterController(ControllerId::master);
 
+	//Launch button booleans
+	bool launchButtonPressed = false;
+	bool launchButtonLastPressed = false;
+
 	while(true)
 	{
 		//--------------------------------------------------------------------//
@@ -28,19 +32,38 @@ void opcontrol()
 		//Drive arcade control with y and r inputs
 		driveVoltage(
 			expCurve(scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::leftY), 8), 1.5, 127),
-			expCurve(scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::rightX), 8), 2, 127)
+			expCurve(scaleDeadband(127 * masterController.getAnalog(ControllerAnalog::rightX), 8), 1.5, 127)
 		);
 
 		//--------------------------------------------------------------------//
 		//                               Puncher                              //
 		//--------------------------------------------------------------------//
 
+		//Update puncher status
+		updatePuncherReady();
+
 		//Puncher launch = Button A
-		if(masterController.getDigital(ControllerDigital::A))
+		launchButtonPressed = masterController.getDigital(ControllerDigital::A);
+		if(launchButtonPressed && !launchButtonLastPressed)
 		{
-			//Launch and wait for completion
-			launch(false);
+			if(puncherReady)
+			{
+				//Initiate launch
+				launch(false);
+			}
 		}
+		launchButtonLastPressed = launchButtonPressed;
+
+		pros::lcd::clear_line(2);
+		pros::lcd::print(2, "BPressed: %i", launchButtonPressed);
+		
+		pros::lcd::clear_line(3);
+		pros::lcd::print(3, "PTarget: %f", puncher.getTargetPosition());
+		pros::lcd::clear_line(4);
+		pros::lcd::print(4, "PReady: %i", puncherReady);
+		pros::lcd::clear_line(5);
+		pros::lcd::print(5, "#L: %i", numLaunches);
+		
 
 		//Print angle adjuster to LLEMU
 		pros::lcd::clear_line(1);
