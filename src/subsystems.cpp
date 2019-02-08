@@ -146,6 +146,18 @@ void updatePuncherReady()
     puncherReady_last = puncherReady;
 }
 
+void waitForPuncherReady()
+{
+    //Wait until puncher reaches target
+    while(!puncherReady)
+    {
+        updatePuncherReady();
+        pros::delay(10);
+    }
+
+    return;
+}
+
 void launch(bool blocking)
 {
     //Set puncher motor target to next launch's end position
@@ -153,6 +165,7 @@ void launch(bool blocking)
 
     if(blocking)
     {
+        puncherReady = false;
         waitForPuncherReady();
     }
     return;
@@ -170,27 +183,15 @@ void primePuncher(int primePos, bool blocking)
     return;
 }
 
-void waitForPuncherReady()
-{
-    //Wait until puncher reaches target
-    while(!puncherReady)
-    {
-        updatePuncherReady();
-        pros::delay(10);
-    }
-
-    return;
-}
-
 void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
 {
-    angleAdjuster.moveAbsolute(puncherPositionValues[static_cast<int>(angle)], speed);
+    angleAdjuster.moveAbsolute(static_cast<int>(angle), speed);
     
     if(blocking)
     {
         //Wait for angle adjuster to be done
         auto angleSettledUtil = SettledUtilFactory::create(3, 5, 60_ms);
-        while(!angleSettledUtil.isSettled(puncherPositionValues[static_cast<int>(angle)] - angleAdjuster.getPosition()))
+        while(!angleSettledUtil.isSettled(static_cast<int>(angle) - angleAdjuster.getPosition()))
         {
             pros::delay(10);
         }
@@ -204,8 +205,7 @@ void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
     setPuncherAngle(firstAngle, 50, true);
 
     //Launch and wait for completion
-    launch();
-    waitForPuncherReady();
+    launch(true);
 
     //Once first launch is complete, load second ball, initiate launch,
     //and wait for angle to be set to low flag
@@ -216,6 +216,21 @@ void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
     //Wait for launch to complete and stop intake
     waitForPuncherReady();
     setIntake(0);
+}
+
+//----------------------------------------------------------------------------//
+//                                  Cap Lift                                  //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+Motor capLiftMotor(19, false, AbstractMotor::gearset::red);
+
+//--------- Functions --------//
+
+double getCapLiftPos()
+{
+    return capLiftMotor.getPosition() * 3.0 / 5.0;
 }
 
 //----------------------------------------------------------------------------//

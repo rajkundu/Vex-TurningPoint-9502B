@@ -10,8 +10,11 @@
 /**
  * Scales input according to deadband and maximum
  * @param input value to be scaled
+ *  - range [-127, 127]
  * @param threshold threshold at/below which to return 0
+ *  - range [-127, 127]
  * @return scaled value or 0
+ *  - range [-127, 127]
  */
 double scaleDeadband(double input, double threshold);
 
@@ -76,9 +79,9 @@ extern int numLaunches;
 enum class PuncherAngles
 {
     NEAR_HIGH_FLAG = 50,
-    NEAR_MID_FLAG = 77,
+    NEAR_LOW_FLAG = 77,
     FAR_HIGH_FLAG = 57,
-    FAR_MID_FLAG = 75
+    FAR_LOW_FLAG = 75
 };
 extern SettledUtil puncherSettledUtil;
 extern bool puncherReady;
@@ -138,6 +141,18 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
  *  - units degrees
  */
 void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle);
+
+//----------------------------------------------------------------------------//
+//                                  Cap Lift                                  //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+extern Motor capLiftMotor;
+
+//--------- Functions --------//
+
+double getCapLiftPos();
 
 //----------------------------------------------------------------------------//
 //                                   Intake                                   //
