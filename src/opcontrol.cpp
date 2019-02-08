@@ -99,12 +99,12 @@ void opcontrol()
 
 		if(masterController.getDigital(ControllerDigital::R2))
 		{
-			//Speed up as cap lift gets higher
+			//While cap lift angle < 160 deg, speed up as cap lift gets higher
 			capLiftMotor.moveVoltage(12000 - (std::min(160.0, getCapLiftPos()) - getCapLiftPos()) * 45);
 		}
 		else if(masterController.getDigital(ControllerDigital::L2))
 		{
-			//Slow down as cap lift gets lower
+			//While cap lift angle < 160 deg, slow down as cap lift gets lower
 			capLiftMotor.moveVoltage(-12000 + (std::min(160.0, getCapLiftPos()) - getCapLiftPos()) * 55);
 		}
 		else
