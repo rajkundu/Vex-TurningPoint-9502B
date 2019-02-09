@@ -144,13 +144,12 @@ void updatePuncherReady();
 void launch(bool blocking = false);
 
 /**
- * primes puncher (moves slide track back so that ball can be loaded)
- * @param priming position relative to home position
+ * moves puncher motor to end target position
+ * @param endPos end target position relative to home position
  *  - units degrees
- *  - default 90 degrees
- * @param blocking whether or not to wait for priming to complete
+ * @param blocking whether or not to wait for puncher to reach end target position
  */
-void primePuncher(int primePos = 90, bool blocking = false);
+void movePuncherTo(int endPos, bool blocking = false);
 
 /**
  * waits for puncher to reach its last-set target position

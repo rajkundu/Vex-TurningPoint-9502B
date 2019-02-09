@@ -179,7 +179,7 @@ Motor angleAdjuster(7, false, AbstractMotor::gearset::red);
 
 int numLaunches = 0;
 const int puncherPositionValues[] = {50, 77, 57, 75};
-SettledUtil puncherSettledUtil = SettledUtilFactory::create();
+SettledUtil puncherSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
 bool puncherReady = true;
 bool puncherReady_last = true;
 
@@ -254,10 +254,10 @@ void launch(bool blocking)
     return;
 }
 
-void primePuncher(int primePos, bool blocking)
+void movePuncherTo(int endPos, bool blocking)
 {
-    //Set puncher motor target to current launch end position + 90 deg
-    puncher.moveAbsolute(numLaunches * 360 + primePos, 100);
+    //Set puncher motor target to current launch home + endPos
+    puncher.moveAbsolute(numLaunches * 360 + endPos, 100);
 
     if(blocking)
     {
@@ -273,7 +273,7 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
     if(blocking)
     {
         //Wait for angle adjuster to be done
-        auto angleSettledUtil = SettledUtilFactory::create(3, 5, 60_ms);
+        auto angleSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
         while(!angleSettledUtil.isSettled(static_cast<int>(angle) - angleAdjuster.getPosition()))
         {
             pros::delay(REFRESH_MS);
