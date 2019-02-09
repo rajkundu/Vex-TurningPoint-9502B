@@ -31,6 +31,9 @@ void opcontrol()
 	//0 = Low Flag, 1 = High Flag
 	bool puncherAngleLowHigh = 0;
 
+	//Set puncher angle to near high flag to start
+	setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
+
 	while(true)
 	{
 		//--------------------------------------------------------------------//

@@ -120,6 +120,37 @@ void driveVoltage(double y, double r, bool preserveProportion)
 }
 
 //----------------------------------------------------------------------------//
+//                     Puncher & Cap Lift Synchronization                     //
+//----------------------------------------------------------------------------//
+
+namespace PuncherAngles
+{
+    PuncherAngle NEAR_HIGH_FLAG(50, 10, 30);
+    PuncherAngle NEAR_LOW_FLAG(77, 20, 40);
+    PuncherAngle FAR_HIGH_FLAG(57, 15, 35);
+    PuncherAngle FAR_LOW_FLAG(75, 10, 30);
+    PuncherAngle * CURRENT;
+}
+PuncherAngle::PuncherAngle(double angleValue, double lowerBound, double upperBound)
+{
+    this->angleValue = angleValue;
+    this->lowerCapLiftInterferenceBound = lowerBound;
+    this->upperCapLiftInterferenceBound = upperBound;
+}
+double PuncherAngle::getAngleValue()
+{
+    return this->angleValue;
+}
+double PuncherAngle::getLowerInterferenceBound()
+{
+    return this->lowerCapLiftInterferenceBound;
+}
+double PuncherAngle::getUpperInterferenceBound()
+{
+    return this->upperCapLiftInterferenceBound;
+}
+
+//----------------------------------------------------------------------------//
 //                                  Cap Lift                                  //
 //----------------------------------------------------------------------------//
 
@@ -137,17 +168,17 @@ double getCapLiftPos()
 bool capLiftInterfering()
 {
     double capLiftPos = getCapLiftPos();
-    return capLiftPos > static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER) || capLiftPos < static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER);
+    return capLiftPos > PuncherAngles::CURRENT->getLowerInterferenceBound() || PuncherAngles::CURRENT->getUpperInterferenceBound();
 }
 
 void unobstructCapLift()
 {
     //If lower than middle of interference range...
-    if(getCapLiftPos() < (static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER) + static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER)) / 2.0)
+    if(getCapLiftPos() < (PuncherAngles::CURRENT->getUpperInterferenceBound() + PuncherAngles::CURRENT->getLowerInterferenceBound()) / 2.0)
     {
         //Move cap lift down out of the way
         capLiftMotor.moveVoltage(-6000);
-        while(getCapLiftPos() > static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER))
+        while(getCapLiftPos() > PuncherAngles::CURRENT->getLowerInterferenceBound())
         {
             pros::delay(REFRESH_MS);
         }
@@ -157,7 +188,7 @@ void unobstructCapLift()
     {
         //Move cap lift up out of the way
         capLiftMotor.moveVoltage(8000);
-        while(getCapLiftPos() < static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER))
+        while(getCapLiftPos() < PuncherAngles::CURRENT->getUpperInterferenceBound())
         {
             pros::delay(REFRESH_MS);
         }
@@ -178,7 +209,6 @@ Motor angleAdjuster(7, false, AbstractMotor::gearset::red);
 //---------- Globals ---------//
 
 int numLaunches = 0;
-const int puncherPositionValues[] = {50, 77, 57, 75};
 SettledUtil puncherSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
 bool puncherReady = true;
 bool puncherReady_last = true;
@@ -266,15 +296,20 @@ void movePuncherTo(int endPos, bool blocking)
     return;
 }
 
-void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
+void setPuncherAngle(PuncherAngle &pAngle, int speed, bool blocking)
 {
-    angleAdjuster.moveAbsolute(static_cast<int>(angle), speed);
+    PuncherAngles::CURRENT = &pAngle;
+
+    pros::lcd::clear_line(3);
+	pros::lcd::print(3, "PAngle: %f, LIB: %f, UIB: %f", PuncherAngles::CURRENT->getAngleValue(), PuncherAngles::CURRENT->getLowerInterferenceBound(), PuncherAngles::CURRENT->getUpperInterferenceBound());
+
+    angleAdjuster.moveAbsolute(pAngle.getAngleValue(), speed);
     
     if(blocking)
     {
         //Wait for angle adjuster to be done
         auto angleSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
-        while(!angleSettledUtil.isSettled(static_cast<int>(angle) - angleAdjuster.getPosition()))
+        while(!angleSettledUtil.isSettled(pAngle.getAngleValue() - angleAdjuster.getPosition()))
         {
             pros::delay(REFRESH_MS);
         }
@@ -282,7 +317,7 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
     return;
 }
 
-void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
+void doubleShot(PuncherAngle &firstAngle, PuncherAngle &secondAngle)
 {
     //Set puncher to high flag
     setPuncherAngle(firstAngle, 50, true);

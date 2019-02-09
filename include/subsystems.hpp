@@ -71,6 +71,26 @@ void driveRPM(double y, double r, bool preserveProportion = true);
 void driveVoltage(double y, double r, bool preserveProportion = true);
 
 //----------------------------------------------------------------------------//
+//                     Puncher & Cap Lift Synchronization                     //
+//----------------------------------------------------------------------------//
+
+class PuncherAngle
+{
+    protected:
+        double angleValue;
+        double lowerCapLiftInterferenceBound;
+        double upperCapLiftInterferenceBound;
+    public:
+        //Constructors
+        PuncherAngle(double angleValue, double lowerBound, double upperBound);
+
+        //Getters
+        double getAngleValue();
+        double getLowerInterferenceBound();
+        double getUpperInterferenceBound();
+};
+
+//----------------------------------------------------------------------------//
 //                                  Cap Lift                                  //
 //----------------------------------------------------------------------------//
 
@@ -80,11 +100,6 @@ extern Motor capLiftMotor;
 
 //---------- Globals ---------//
 
-enum class CAPLIFT_INTERFERENCE_BOUNDS
-{
-    LOWER = 15,
-    UPPER = 40
-};
 const int CAPLIFT_VOLTAGE_HOLD = 1500;
 
 //--------- Functions --------//
@@ -113,13 +128,14 @@ extern Motor angleAdjuster;
 //---------- Globals ---------//
 
 extern int numLaunches;
-enum class PuncherAngles
+namespace PuncherAngles
 {
-    NEAR_HIGH_FLAG = 50,
-    NEAR_LOW_FLAG = 77,
-    FAR_HIGH_FLAG = 57,
-    FAR_LOW_FLAG = 75
-};
+    extern PuncherAngle NEAR_HIGH_FLAG;
+    extern PuncherAngle NEAR_LOW_FLAG;
+    extern PuncherAngle FAR_HIGH_FLAG;
+    extern PuncherAngle FAR_LOW_FLAG;
+    extern PuncherAngle * current;
+}
 extern SettledUtil puncherSettledUtil;
 extern bool puncherReady;
 extern bool puncherReady_last;
@@ -165,7 +181,7 @@ void waitForPuncherReady();
  * @param blocking whether or not to wait for angle adjuster to reach angle
  *  - default false
  */
-void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false);
+void setPuncherAngle(PuncherAngle &angle, int speed = 50, bool blocking = false);
 
 /**
  * runs double shot macro
@@ -176,7 +192,7 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
  *  adjuster arm
  *  - units degrees
  */
-void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle);
+void doubleShot(PuncherAngle &firstAngle, PuncherAngle &secondAngle);
 
 //----------------------------------------------------------------------------//
 //                                   Intake                                   //
