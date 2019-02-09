@@ -100,19 +100,24 @@ void opcontrol()
 		if(masterController.getDigital(ControllerDigital::R2))
 		{
 			//While cap lift angle < 170 deg, speed up as cap lift gets higher
-			capLiftMotor.moveVoltage(8000 - (std::min(150.0, 150.0 - getCapLiftPos())) * 30);
+			capLiftMotor.moveVoltage(12000 - (std::max(0.0, 170.0 - getCapLiftPos())) * 30);
 		}
 		else if(masterController.getDigital(ControllerDigital::L2))
 		{
 			//While cap lift angle < 170 deg, slow down as cap lift gets lower
-			capLiftMotor.moveVoltage(-8000 + (std::max(0.0, 150.0 - getCapLiftPos())) * 30);
+			capLiftMotor.moveVoltage(-(6000 - (std::max(0.0, 170.0 - getCapLiftPos())) * 30));
 		}
 		else
 		{
 			//If cap is in carry position range, set brake mode to hold
-			if(getCapLiftPos() < 170 && getCapLiftPos() > 30)
+			if(getCapLiftPos() < 30)
 			{
-				capLiftMotor.moveVoltage(1600);
+				//Go to neutral ground pos
+				capLiftMotor.moveVoltage(1200);
+			}
+			else if(getCapLiftPos() < 170)
+			{
+				capLiftMotor.moveVoltage(1500);
 			}
 			//Else, set brake mode to coast and use physical hardstops
 			else
@@ -137,13 +142,13 @@ void opcontrol()
 		else if(masterController.getDigital(ControllerDigital::L1))
 		{
 			//Flip caps/out-take balls
-			setIntake(-200);
+			setIntake(-150);
 		}
 		else
 		{
 			setIntake(0);
 		}
 
-		pros::delay(10);
+		pros::delay(REFRESH_MS);
 	}
 }
