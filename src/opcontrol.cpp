@@ -99,32 +99,25 @@ void opcontrol()
 
 		if(masterController.getDigital(ControllerDigital::R2))
 		{
-			//While cap lift angle < 160 deg, speed up as cap lift gets higher
-			capLiftMotor.moveVoltage(12000 - (std::min(160.0, getCapLiftPos()) - getCapLiftPos()) * 45);
+			//While cap lift angle < 170 deg, speed up as cap lift gets higher
+			capLiftMotor.moveVoltage(8000 - (std::min(150.0, 150.0 - getCapLiftPos())) * 30);
 		}
 		else if(masterController.getDigital(ControllerDigital::L2))
 		{
-			//While cap lift angle < 160 deg, slow down as cap lift gets lower
-			capLiftMotor.moveVoltage(-12000 + (std::min(160.0, getCapLiftPos()) - getCapLiftPos()) * 55);
+			//While cap lift angle < 170 deg, slow down as cap lift gets lower
+			capLiftMotor.moveVoltage(-8000 + (std::max(0.0, 150.0 - getCapLiftPos())) * 30);
 		}
 		else
 		{
 			//If cap is in carry position range, set brake mode to hold
-			if(getCapLiftPos() < 135 && getCapLiftPos() > 30)
+			if(getCapLiftPos() < 170 && getCapLiftPos() > 30)
 			{
-				if(capLiftMotor.getBrakeMode() != AbstractMotor::brakeMode::hold)
-				{
-					capLiftMotor.setBrakeMode(AbstractMotor::brakeMode::hold);
-				}
-				capLiftMotor.moveVelocity(0);
+				capLiftMotor.moveVoltage(1600);
 			}
 			//Else, set brake mode to coast and use physical hardstops
 			else
 			{
-				if(capLiftMotor.getBrakeMode() != AbstractMotor::brakeMode::coast)
-				{
-					capLiftMotor.setBrakeMode(AbstractMotor::brakeMode::coast);
-				}
+				capLiftMotor.setBrakeMode(AbstractMotor::brakeMode::coast);
 				capLiftMotor.moveVelocity(0);
 			}
 		}

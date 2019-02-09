@@ -34,7 +34,7 @@ ChassisControllerPID drivetrain = ChassisControllerFactory::create(
     //Left motors
     {10, 3},
     //Right motors
-    {-13, -12},
+    {-1, -2},
     //Distance PID constants
     IterativePosPIDController::Gains{0.5, 0, 0},
     //Angle PID constants (keeps robot straight)
@@ -96,7 +96,7 @@ void driveVoltage(double y, double r, bool preserveProportion)
 //---------- Motors ----------//
 
 Motor puncher(9, true, AbstractMotor::gearset::red);
-Motor angleAdjuster(11, false, AbstractMotor::gearset::red);
+Motor angleAdjuster(7, false, AbstractMotor::gearset::red);
 
 //---------- Globals ---------//
 
@@ -224,7 +224,7 @@ void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
 
 //---------- Motors ----------//
 
-Motor capLiftMotor(19, false, AbstractMotor::gearset::red);
+Motor capLiftMotor(20, false, AbstractMotor::gearset::red);
 
 //--------- Functions --------//
 
@@ -239,7 +239,7 @@ double getCapLiftPos()
 
 //---------- Motors ----------//
 
-Motor intake(18, false, AbstractMotor::gearset::green);
+Motor intake(8, false, AbstractMotor::gearset::green);
 
 //--------- Functions --------//
 
