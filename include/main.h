@@ -79,4 +79,6 @@ void opcontrol(void);
 //#include <iostream>
 #endif
 
+static const double REFRESH_MS = 10.0;
+
 #endif  // _PROS_MAIN_H_
