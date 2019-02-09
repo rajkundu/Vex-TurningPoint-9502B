@@ -46,6 +46,15 @@ ChassisControllerPID drivetrain = ChassisControllerFactory::create(
     //Wheel diameter, wheelbase width
     {4.1_in, 12.5_in}
 );
+bool slewEnabled = true;
+//Slew rates in units [-127, 127] per loop iteration
+double slewRate_y = 7;
+double slewRate_r = 7;
+//Variables for tracking change in y and r
+double d_y = 0;
+double d_r = 0;
+double y_last = 0;
+double r_last = 0;
 
 //--------- Functions --------//
 
@@ -71,6 +80,27 @@ void driveRPM(double y, double r, bool preserveProportion)
 
 void driveVoltage(double y, double r, bool preserveProportion)
 {
+    //Slew control
+    if(slewEnabled)
+    {
+        d_y = y - y_last;
+        d_r = r - r_last;
+
+        //If y changed by more than the slew rate...
+        if(std::abs(d_y) > slewRate_y)
+        {
+            y = (d_y < 0) ? y_last - slewRate_y : y_last + slewRate_y;
+        }
+        //If r changed by more than the slew rate...
+        if(std::abs(d_r) > slewRate_r)
+        {
+            r = (d_r < 0) ? r_last - slewRate_r : r_last + slewRate_r;
+        }
+
+        y_last = y;
+        r_last = r;
+    }
+
     //Scale down from 127 to 1
     y /= 127.0;
     r /= 127.0;
@@ -115,7 +145,7 @@ void resetPuncher()
     //Wait until puncher motor is stopped
     while(!puncher.isStopped())
     {
-        pros::delay(10);
+        pros::delay(REFRESH_MS);
     }
 
     //Reset position variables
@@ -127,7 +157,7 @@ void resetPuncher()
     while(!puncherReady)
     {
         updatePuncherReady();
-        pros::delay(10);
+        pros::delay(REFRESH_MS);
     }
     return;
 }
@@ -152,7 +182,7 @@ void waitForPuncherReady()
     while(!puncherReady)
     {
         updatePuncherReady();
-        pros::delay(10);
+        pros::delay(REFRESH_MS);
     }
 
     return;
@@ -193,7 +223,7 @@ void setPuncherAngle(PuncherAngles angle, int speed, bool blocking)
         auto angleSettledUtil = SettledUtilFactory::create(3, 5, 60_ms);
         while(!angleSettledUtil.isSettled(static_cast<int>(angle) - angleAdjuster.getPosition()))
         {
-            pros::delay(10);
+            pros::delay(REFRESH_MS);
         }
     }
     return;

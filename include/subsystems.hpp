@@ -35,6 +35,12 @@ double expCurve(double input, double power, double maxValue);
 //---------- Globals ---------//
 
 extern ChassisControllerPID drivetrain;
+extern bool slewEnabled;
+//Slew rate in [-1, 1] units per second
+extern double slewRate_y;
+extern double slewRate_r;
+extern double y_last;
+extern double r_last;
 
 //--------- Functions --------//
 
@@ -152,6 +158,10 @@ extern Motor capLiftMotor;
 
 //--------- Functions --------//
 
+/**
+ * gets angle of cap lift relative to home/starting position
+ * @return angle of capLiftMotor / gear ratio = angle of cap lift
+ */
 double getCapLiftPos();
 
 //----------------------------------------------------------------------------//
