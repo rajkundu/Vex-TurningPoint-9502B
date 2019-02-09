@@ -71,6 +71,37 @@ void driveRPM(double y, double r, bool preserveProportion = true);
 void driveVoltage(double y, double r, bool preserveProportion = true);
 
 //----------------------------------------------------------------------------//
+//                                  Cap Lift                                  //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+extern Motor capLiftMotor;
+
+//---------- Globals ---------//
+
+enum class CAPLIFT_INTERFERENCE_BOUNDS
+{
+    LOWER = 15,
+    UPPER = 40
+};
+const int CAPLIFT_VOLTAGE_HOLD = 1500;
+
+//--------- Functions --------//
+
+/**
+ * gets angle of cap lift relative to home/starting position
+ * @return angle of capLiftMotor / gear ratio = angle of cap lift
+ */
+double getCapLiftPos();
+
+/**
+ * returns whether the cap lift is in range of interfering with puncher
+ * @return whether cap lift is interfering range
+ */
+bool capLiftInterfering();
+
+//----------------------------------------------------------------------------//
 //                                  Puncher                                   //
 //----------------------------------------------------------------------------//
 
@@ -147,22 +178,6 @@ void setPuncherAngle(PuncherAngles angle, int speed = 50, bool blocking = false)
  *  - units degrees
  */
 void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle);
-
-//----------------------------------------------------------------------------//
-//                                  Cap Lift                                  //
-//----------------------------------------------------------------------------//
-
-//---------- Motors ----------//
-
-extern Motor capLiftMotor;
-
-//--------- Functions --------//
-
-/**
- * gets angle of cap lift relative to home/starting position
- * @return angle of capLiftMotor / gear ratio = angle of cap lift
- */
-double getCapLiftPos();
 
 //----------------------------------------------------------------------------//
 //                                   Intake                                   //

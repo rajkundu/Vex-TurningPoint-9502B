@@ -120,6 +120,53 @@ void driveVoltage(double y, double r, bool preserveProportion)
 }
 
 //----------------------------------------------------------------------------//
+//                                  Cap Lift                                  //
+//----------------------------------------------------------------------------//
+
+//---------- Motors ----------//
+
+Motor capLiftMotor(20, false, AbstractMotor::gearset::red);
+
+//--------- Functions --------//
+
+double getCapLiftPos()
+{
+    return capLiftMotor.getPosition() * 3.0 / 5.0;
+}
+
+bool capLiftInterfering()
+{
+    double capLiftPos = getCapLiftPos();
+    return capLiftPos > static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER) || capLiftPos < static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER);
+}
+
+void unobstructCapLift()
+{
+    //If lower than middle of interference range...
+    if(getCapLiftPos() < (static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER) + static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER)) / 2.0)
+    {
+        //Move cap lift down out of the way
+        capLiftMotor.moveVoltage(-6000);
+        while(getCapLiftPos() > static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::LOWER))
+        {
+            pros::delay(REFRESH_MS);
+        }
+    }
+    //Else, if higher than or in the middle of interference range...
+    else
+    {
+        //Move cap lift up out of the way
+        capLiftMotor.moveVoltage(8000);
+        while(getCapLiftPos() < static_cast<double>(CAPLIFT_INTERFERENCE_BOUNDS::UPPER))
+        {
+            pros::delay(REFRESH_MS);
+        }
+    }
+    //Hold cap lift in place
+    capLiftMotor.moveVoltage(CAPLIFT_VOLTAGE_HOLD);
+}
+
+//----------------------------------------------------------------------------//
 //                                   Puncher                                  //
 //----------------------------------------------------------------------------//
 
@@ -190,6 +237,12 @@ void waitForPuncherReady()
 
 void launch(bool blocking)
 {
+    //Move cap lift if interfering
+    if(capLiftInterfering())
+    {
+        unobstructCapLift();
+    }
+
     //Set puncher motor target to next launch's end position
     puncher.moveAbsolute(numLaunches * 360 + 360, 100);
 
@@ -246,21 +299,6 @@ void doubleShot(PuncherAngles firstAngle, PuncherAngles secondAngle)
     //Wait for launch to complete and stop intake
     waitForPuncherReady();
     setIntake(0);
-}
-
-//----------------------------------------------------------------------------//
-//                                  Cap Lift                                  //
-//----------------------------------------------------------------------------//
-
-//---------- Motors ----------//
-
-Motor capLiftMotor(20, false, AbstractMotor::gearset::red);
-
-//--------- Functions --------//
-
-double getCapLiftPos()
-{
-    return capLiftMotor.getPosition() * 3.0 / 5.0;
 }
 
 //----------------------------------------------------------------------------//
