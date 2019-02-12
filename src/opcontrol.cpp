@@ -145,7 +145,7 @@ void opcontrol()
 		else if(masterController.getDigital(ControllerDigital::L1))
 		{
 			//Flip caps/out-take balls
-			setIntake(-150);
+			setIntake(-200);
 		}
 		else
 		{
