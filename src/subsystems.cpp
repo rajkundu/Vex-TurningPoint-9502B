@@ -125,10 +125,10 @@ void driveVoltage(double y, double r, bool preserveProportion)
 
 namespace PuncherAngles
 {
-    PuncherAngle NEAR_HIGH_FLAG(50, 10, 30);
-    PuncherAngle NEAR_LOW_FLAG(77, 20, 40);
-    PuncherAngle FAR_HIGH_FLAG(57, 15, 35);
-    PuncherAngle FAR_LOW_FLAG(75, 10, 30);
+    PuncherAngle NEAR_HIGH_FLAG(50, 10, 40);
+    PuncherAngle NEAR_LOW_FLAG(77, 15, 50);
+    PuncherAngle FAR_HIGH_FLAG(57, 10, 40);
+    PuncherAngle FAR_LOW_FLAG(75, 15, 50);
     PuncherAngle * CURRENT;
 }
 PuncherAngle::PuncherAngle(double angleValue, double lowerBound, double upperBound)
