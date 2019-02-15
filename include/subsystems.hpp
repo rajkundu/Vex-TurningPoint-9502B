@@ -5,6 +5,10 @@
 //                                Miscellaneous                               //
 //----------------------------------------------------------------------------//
 
+//---------- Globals ---------//
+
+extern Controller masterController;
+
 //--------- Functions --------//
 
 /**
@@ -128,6 +132,7 @@ extern Motor angleAdjuster;
 //---------- Globals ---------//
 
 extern int numLaunches;
+extern bool puncherReady;
 namespace PuncherAngles
 {
     extern PuncherAngle NEAR_HIGH_FLAG;
@@ -136,9 +141,6 @@ namespace PuncherAngles
     extern PuncherAngle FAR_LOW_FLAG;
     extern PuncherAngle * current;
 }
-extern SettledUtil puncherSettledUtil;
-extern bool puncherReady;
-extern bool puncherReady_last;
 
 //--------- Functions --------//
 
@@ -146,12 +148,6 @@ extern bool puncherReady_last;
  * resets puncher home position
  */
 void resetPuncher();
-
-/**
- * checks whether puncher has reached target position
- * @return status of puncher SettledUtil
- */
-void updatePuncherReady();
 
 /**
  * launches ball by rotating puncher motor 360 degrees
@@ -193,6 +189,12 @@ void setPuncherAngle(PuncherAngle &angle, int speed = 50, bool blocking = false)
  *  - units degrees
  */
 void doubleShot(PuncherAngle &firstAngle, PuncherAngle &secondAngle);
+
+/**
+ * handles puncher during opcontrol
+ * @param param unused null parameter
+ */
+void puncherHandler(void * param);
 
 //----------------------------------------------------------------------------//
 //                                   Intake                                   //

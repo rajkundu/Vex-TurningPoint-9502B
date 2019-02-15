@@ -16,20 +16,11 @@
  */
 void opcontrol()
 {
-	//Instantiate controller object
-	Controller masterController(ControllerId::master);
-
 	//Set drivetrain brake mode
 	drivetrain.setBrakeMode(AbstractMotor::brakeMode::coast);
 
-	//Button booleans
-	bool launchButtonPressed = false;
-	bool launchButtonLastPressed = false;
-	bool togglePuncherAnglePressed = false;
-	bool togglePuncherAngleLastPressed = false;
-
-	//0 = Low Flag, 1 = High Flag
-	bool puncherAngleLowHigh = 0;
+	//Spawn puncher handler task
+	pros::Task puncherHandlerTask(puncherHandler, nullptr);
 
 	//Set puncher angle to near high flag to start
 	setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
@@ -56,7 +47,7 @@ void opcontrol()
 			//While cap lift angle < 170 deg, speed up as cap lift gets higher
 			capLiftMotor.moveVoltage(12000 - (std::max(0.0, 170.0 - getCapLiftPos())) * 30);
 		}
-		else if(masterController.getDigital(ControllerDigital::L2))
+		else if(masterController.getDigital(ControllerDigital::L2) && (getCapLiftPos() > 26.5))
 		{
 			//While cap lift angle < 170 deg, slow down as cap lift gets lower
 			capLiftMotor.moveVoltage(-(6000 - (std::max(0.0, 170.0 - getCapLiftPos())) * 30));
@@ -83,55 +74,6 @@ void opcontrol()
 
 		pros::lcd::clear_line(2);
 		pros::lcd::print(2, "CLPos#: %f", getCapLiftPos());
-
-		//--------------------------------------------------------------------//
-		//                               Puncher                              //
-		//--------------------------------------------------------------------//
-
-		//Update puncher status
-		updatePuncherReady();
-
-		//Puncher launch = Button Y
-		launchButtonPressed = masterController.getDigital(ControllerDigital::Y);
-		//If new press...
-		if(launchButtonPressed && !launchButtonLastPressed)
-		{
-			if(puncherReady)
-			{
-				//Initiate launch
-				launch(false);
-			}
-		}
-		launchButtonLastPressed = launchButtonPressed;
-
-		//Angle adjuster toggle = Button X
-		togglePuncherAnglePressed = masterController.getDigital(ControllerDigital::X);
-		//If new press...
-		if(togglePuncherAnglePressed && !togglePuncherAngleLastPressed)
-		{
-			puncherAngleLowHigh = !puncherAngleLowHigh;
-			
-			//Set new puncher angle
-			if(puncherAngleLowHigh == 0)
-			{
-				setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
-			}
-			else
-			{
-				setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG);
-			}
-		}
-		togglePuncherAngleLastPressed = togglePuncherAnglePressed;
-
-		//Print angle adjuster to LLEMU
-		pros::lcd::clear_line(1);
-		pros::lcd::print(1, "PAngle: %f", angleAdjuster.getPosition());
-		
-		//Double shot macro
-		if(masterController.getDigital(ControllerDigital::B))
-		{
-			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_LOW_FLAG);
-		}
 
 		//--------------------------------------------------------------------//
 		//                               Intake                               //

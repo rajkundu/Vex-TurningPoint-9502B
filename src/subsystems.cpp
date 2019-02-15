@@ -5,6 +5,10 @@
 //                                Miscellaneous                               //
 //----------------------------------------------------------------------------//
 
+//---------- Globals ---------//
+
+Controller masterController(ControllerId::master);
+
 //--------- Functions --------//
 
 double scaleDeadband(double input, double threshold)
@@ -125,10 +129,10 @@ void driveVoltage(double y, double r, bool preserveProportion)
 
 namespace PuncherAngles
 {
-    PuncherAngle NEAR_HIGH_FLAG(50, 10, 40);
-    PuncherAngle NEAR_LOW_FLAG(77, 15, 50);
-    PuncherAngle FAR_HIGH_FLAG(57, 10, 40);
-    PuncherAngle FAR_LOW_FLAG(75, 15, 50);
+    PuncherAngle NEAR_HIGH_FLAG(50, 20, 50);
+    PuncherAngle NEAR_LOW_FLAG(74, 33, 50);
+    PuncherAngle FAR_HIGH_FLAG(57, 18, 48);
+    PuncherAngle FAR_LOW_FLAG(71, 33, 50);
     PuncherAngle * CURRENT;
 }
 PuncherAngle::PuncherAngle(double angleValue, double lowerBound, double upperBound)
@@ -209,9 +213,7 @@ Motor angleAdjuster(7, false, AbstractMotor::gearset::red);
 //---------- Globals ---------//
 
 int numLaunches = 0;
-SettledUtil puncherSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
-bool puncherReady = true;
-bool puncherReady_last = true;
+bool puncherReady = false;
 
 //--------- Functions --------//
 
@@ -230,57 +232,37 @@ void resetPuncher()
     numLaunches = 0;
     */
 
-    //Wait for puncher motor to initialize
-    while(!puncherReady)
-    {
-        updatePuncherReady();
-        pros::delay(REFRESH_MS);
-    }
-    return;
-}
-
-void updatePuncherReady()
-{
-    puncherReady = puncherSettledUtil.isSettled(puncher.getTargetPosition() - puncher.getPosition());
-
-    //Update numLaunches if target position is not 0 (to ensure that this isn't
-    //just the puncher motor starting at and immediately reaching 0)
-    if(puncherReady && !puncherReady_last && (puncher.getTargetPosition() != 0))
-    {
-        numLaunches++;
-    }
-
-    puncherReady_last = puncherReady;
+   return;
 }
 
 void waitForPuncherReady()
 {
-    //Wait until puncher reaches target
-    while(!puncherReady)
+    SettledUtil puncherSettledUtil = SettledUtilFactory::create(3, 5, 30_ms);
+
+    while(!puncherSettledUtil.isSettled(puncher.getTargetPosition() - puncher.getPosition()))
     {
-        updatePuncherReady();
         pros::delay(REFRESH_MS);
     }
-
     return;
 }
 
 void launch(bool blocking)
 {
+    puncherReady = false;
+
     //Move cap lift if interfering
     if(capLiftInterfering())
     {
         unobstructCapLift();
     }
 
-    //Set puncher motor target to next launch's end position
-    puncher.moveAbsolute(numLaunches * 360 + 360, 100);
+    movePuncherTo(360, blocking);
+    
+    //Increment numLaunches after firing
+    numLaunches++;
 
-    if(blocking)
-    {
-        puncherReady = false;
-        waitForPuncherReady();
-    }
+    puncherReady = true;
+
     return;
 }
 
@@ -328,12 +310,71 @@ void doubleShot(PuncherAngle &firstAngle, PuncherAngle &secondAngle)
     //Once first launch is complete, load second ball, initiate launch,
     //and wait for angle to be set to low flag
     setIntake(200);
-    launch();
+    launch(false);
     setPuncherAngle(secondAngle, 50, true);
 
     //Wait for launch to complete and stop intake
     waitForPuncherReady();
     setIntake(0);
+}
+
+void puncherHandler(void * param)
+{
+    //Button booleans
+	bool launchButtonPressed = false;
+	bool launchButtonLastPressed = false;
+	bool togglePuncherAnglePressed = false;
+	bool togglePuncherAngleLastPressed = false;
+
+	//0 = Low Flag, 1 = High Flag
+	bool puncherAngleLowHigh = 0;
+
+    while(true)
+    {
+        //--------------------------------------------------------------------//
+		//                               Puncher                              //
+		//--------------------------------------------------------------------//
+
+		//Puncher launch = Button Y
+		launchButtonPressed = masterController.getDigital(ControllerDigital::Y);
+		//If new press...
+		if(launchButtonPressed && !launchButtonLastPressed)
+		{
+			if(puncherReady)
+			{
+				//Initiate launch
+				launch(true);
+			}
+		}
+		launchButtonLastPressed = launchButtonPressed;
+
+		//Angle adjuster toggle = Button X
+		togglePuncherAnglePressed = masterController.getDigital(ControllerDigital::X);
+		//If new press...
+		if(togglePuncherAnglePressed && !togglePuncherAngleLastPressed)
+		{
+			puncherAngleLowHigh = !puncherAngleLowHigh;
+			
+			//Set new puncher angle
+			if(puncherAngleLowHigh == 0)
+			{
+				setPuncherAngle(PuncherAngles::NEAR_HIGH_FLAG);
+			}
+			else
+			{
+				setPuncherAngle(PuncherAngles::NEAR_LOW_FLAG);
+			}
+		}
+		togglePuncherAngleLastPressed = togglePuncherAnglePressed;
+		
+		//Double shot macro
+		if(masterController.getDigital(ControllerDigital::B))
+		{
+			doubleShot(PuncherAngles::NEAR_HIGH_FLAG, PuncherAngles::NEAR_LOW_FLAG);
+		}
+
+        pros::delay(REFRESH_MS);
+    }
 }
 
 //----------------------------------------------------------------------------//
